@@ -1,0 +1,8 @@
+{
+    "input_size": 128,
+    "hidden_size": 64,
+    "output_size": 1,
+    "num_layers": 2,
+    "epochs": 20,
+    "learning_rate": 0.001
+}
