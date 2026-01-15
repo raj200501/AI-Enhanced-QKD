@@ -1,13 +1,22 @@
-import pandas as pd
-import numpy as np
+"""Legacy wrapper for data preprocessing."""
 
-def preprocess_data(input_path, output_path):
-    # Load the raw data
-    data = pd.read_csv(input_path)
-    # Preprocess the data (e.g., normalization, noise reduction)
-    processed_data = data.apply(lambda x: (x - np.mean(x)) / np.std(x))
-    # Save the processed data
-    processed_data.to_csv(output_path, index=False)
+from pathlib import Path
+
+from ai_qkd.pipeline import PipelineConfig, _default_artifacts, generate_data, preprocess_data
+
+
+def main() -> None:
+    config = PipelineConfig()
+    artifacts = _default_artifacts(Path.cwd())
+    generate_data(config.data, artifacts)
+    preprocess_data(
+        artifacts,
+        seed=config.data.seed,
+        anomaly_threshold=config.anomaly.anomaly_threshold,
+    )
+    print(f"Raw data stored at {artifacts.raw_path}")
+    print(f"Processed data stored at {artifacts.processed_dir}")
+
 
 if __name__ == "__main__":
-    preprocess_data('data/raw/quantum_data.csv', 'data/processed/processed_data.csv')
+    main()

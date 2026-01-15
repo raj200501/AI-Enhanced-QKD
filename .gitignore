@@ -1,0 +1,23 @@
+.venv/
+__pycache__/
+*.pyc
+.data/
+*.log
+.pytest_cache/
+
+# Generated artifacts
+data/processed/
+data/processed/*.csv
+results/
+results/*.json
+models/
+models/**/*.json
+
+# Allow tracked config and sample data
+!config/pipeline.json
+!data/raw/quantum_data.csv
+!results/
+!results/.gitkeep
+!models/
+!models/**/
+!models/**/.gitkeep
