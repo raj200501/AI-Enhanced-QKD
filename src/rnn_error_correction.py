@@ -1,53 +1,21 @@
-import torch
-import torch.nn as nn
-import numpy as np
+"""Legacy wrapper for error correction training."""
 
-class RNNModel(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_layers):
-        super(RNNModel, self).__init__()
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
-        self.fc = nn.Linear(hidden_size, output_size)
-    
-    def forward(self, x):
-        h_0 = torch.zeros(num_layers, x.size(0), hidden_size).to(device) 
-        c_0 = torch.zeros(num_layers, x.size(0), hidden_size).to(device)
-        out, _ = self.lstm(x, (h_0, c_0))
-        out = self.fc(out[:, -1, :])
-        return out
+from pathlib import Path
 
-def train_rnn_model(train_data, train_labels, val_data, val_labels, config):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = RNNModel(config['input_size'], config['hidden_size'], config['output_size'], config['num_layers']).to(device)
-    criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
-    train_data, train_labels = torch.tensor(train_data, dtype=torch.float32).to(device), torch.tensor(train_labels, dtype=torch.float32).to(device)
-    val_data, val_labels = torch.tensor(val_data, dtype=torch.float32).to(device), torch.tensor(val_labels, dtype=torch.float32).to(device)
-    
-    for epoch in range(config['epochs']):
-        model.train()
-        outputs = model(train_data)
-        optimizer.zero_grad()
-        loss = criterion(outputs, train_labels)
-        loss.backward()
-        optimizer.step()
-        
-        model.eval()
-        val_outputs = model(val_data)
-        val_loss = criterion(val_outputs, val_labels)
-        print(f'Epoch [{epoch+1}/{config["epochs"]}], Train Loss: {loss.item()}, Validation Loss: {val_loss.item()}')
+from ai_qkd.pipeline import PipelineConfig, _default_artifacts, train_error_correction
 
-    torch.save(model.state_dict(), 'models/rnn_error_correction/model.pth')
-    return model
+
+def main() -> None:
+    config = PipelineConfig()
+    artifacts = _default_artifacts(Path.cwd())
+    model, reports = train_error_correction(config, artifacts)
+    best = reports[0]
+    for report in reports:
+        if report.bit_error_rate < best.bit_error_rate:
+            best = report
+    print(f"Saved error correction model to {artifacts.error_model_path}")
+    print(f"Best window size: {best.window_size}, BER: {best.bit_error_rate:.3f}")
+
 
 if __name__ == "__main__":
-    # Load preprocessed data
-    train_data = np.load('data/processed/train_data.npy')
-    train_labels = np.load('data/processed/train_labels.npy')
-    val_data = np.load('data/processed/val_data.npy')
-    val_labels = np.load('data/processed/val_labels.npy')
-    # Load configuration
-    import json
-    with open('config/rnn_config.json', 'r') as f:
-        config = json.load(f)
-    # Train the RNN model
-    model = train_rnn_model(train_data, train_labels, val_data, val_labels, config)
+    main()

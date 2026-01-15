@@ -1,27 +1,19 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='AI-Enhanced-QKD',
-    version='0.1',
-    packages=find_packages(),
-    install_requires=[
-        'numpy',
-        'pandas',
-        'scikit-learn',
-        'tensorflow',
-        'torch',
-        'matplotlib',
-        'seaborn',
-        'gym',
-        'jupyter',
-    ],
+    name="ai-enhanced-qkd",
+    version="1.0.0",
+    packages=find_packages("src"),
+    package_dir={"": "src"},
+    install_requires=[],
     entry_points={
-        'console_scripts': [
-            'data_preprocessing=src.data_preprocessing:main',
-            'cnn_anomaly_detection=src.cnn_anomaly_detection:main',
-            'rnn_error_correction=src.rnn_error_correction:main',
-            'rl_key_distribution=src.rl_key_distribution:main',
-            'evaluate_results=src.evaluate_results:main',
+        "console_scripts": [
+            "qkd=ai_qkd.cli:main",
+            "qkd-preprocess=data_preprocessing:main",
+            "qkd-anomaly=cnn_anomaly_detection:main",
+            "qkd-error=rnn_error_correction:main",
+            "qkd-rl=rl_key_distribution:main",
+            "qkd-evaluate=evaluate_results:main",
         ],
     },
 )
